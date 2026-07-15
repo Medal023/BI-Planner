@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://studied-stock-306704.web.app/sitemap.xml

@@ -1,0 +1,24 @@
+{
+  "name": "BI Planner Pro - Gestão Financeira Inteligente",
+  "short_name": "BI Planner Pro",
+  "description": "Uma plataforma de Business Intelligence e planejamento financeiro para reestruturar orçamentos deficitários, com simuladores de dívidas e análise por Inteligência Artificial.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ]
+}
