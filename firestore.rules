@@ -1,0 +1,163 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net: Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Standard Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Validation Blueprint for UserProfile
+    function isValidUserProfile(data) {
+      return data.uid is string && data.uid.size() <= 128 &&
+             data.nome is string && data.nome.size() <= 256 &&
+             data.email is string && data.email.size() <= 256 &&
+             data.telefone is string && data.telefone.size() <= 32 &&
+             data.foto is string && data.foto.size() <= 1024 &&
+             data.provedor_login is string && data.provedor_login.size() <= 64 &&
+             data.email_verificado is bool &&
+             data.data_criacao is string && data.data_criacao.size() <= 64 &&
+             data.ultimo_login is string && data.ultimo_login.size() <= 64 &&
+             data.status is string && data.status.size() <= 32 &&
+             data.perfil is string && data.perfil.size() <= 32 &&
+             data.preferencias is map;
+    }
+
+    // Validation Blueprint for BudgetData
+    function isValidBudgetData(data) {
+      return data.userId is string && data.userId.size() <= 128 &&
+             data.data is string && data.data.size() <= 5000000 &&
+             data.updatedAt is string && data.updatedAt.size() <= 64;
+    }
+
+    // Validation Blueprint for IncomeProfile
+    function isValidIncomeProfile(data) {
+      return data.salarioBase is number &&
+             data.rendasExtras is list &&
+             data.rendaTotal is number &&
+             data.frequencia is string && data.frequencia.size() <= 64 &&
+             data.ultimaAtualizacao is string && data.ultimaAtualizacao.size() <= 64 &&
+             data.usuario is string && data.usuario.size() <= 128 &&
+             data.historico is list;
+    }
+
+    // Users Collection Match Block
+    match /users/{userId} {
+      // Only the authenticated user can get their own profile. No blanket list read is allowed.
+      allow get: if isOwner(userId);
+
+      // Create profile: must be owner, valid ID, and conform to the schema blueprint
+      allow create: if isOwner(userId) && 
+                      isValidUserProfile(incoming()) && 
+                      incoming().uid == userId &&
+                      incoming().perfil == "user" &&
+                      incoming().status == "active";
+
+      // Update profile: can update name, phone, photo, preferences, and last login but cannot change uid, email, creation date, role/perfil or status
+      allow update: if isOwner(userId) &&
+                      isValidUserProfile(incoming()) &&
+                      incoming().uid == existing().uid &&
+                      incoming().email == existing().email &&
+                      incoming().data_criacao == existing().data_criacao &&
+                      incoming().perfil == existing().perfil &&
+                      incoming().status == existing().status &&
+                      incoming().diff(existing()).affectedKeys().hasAny(['nome', 'telefone', 'foto', 'preferencias', 'ultimo_login', 'email_verificado']);
+
+      // Delete profile: Allow only the owner to delete their own profile
+      allow delete: if isOwner(userId);
+
+      // Budget Subcollection Match Block
+      match /budget/data {
+        allow get: if isOwner(userId);
+        
+        allow create: if isOwner(userId) && 
+                        isValidBudgetData(incoming()) && 
+                        incoming().userId == userId;
+
+        allow update: if isOwner(userId) && 
+                        isValidBudgetData(incoming()) && 
+                        incoming().userId == existing().userId &&
+                        incoming().userId == userId;
+
+        allow delete: if isOwner(userId);
+      }
+    }
+
+    match /income_profile/{userId} {
+      allow get: if isOwner(userId);
+      
+      allow create: if isOwner(userId) && 
+                      isValidIncomeProfile(incoming()) && 
+                      incoming().usuario == userId;
+
+      allow update: if isOwner(userId) && 
+                      isValidIncomeProfile(incoming()) && 
+                      incoming().usuario == existing().usuario &&
+                      incoming().usuario == userId;
+
+      allow delete: if isOwner(userId);
+    }
+
+    // Rules for additional collections used by the reset and backup process
+    match /transactions/{transactionId} {
+      allow read, write: if request.auth != null && (
+        transactionId == request.auth.uid || 
+        (resource == null && request.resource.data.uid == request.auth.uid) || 
+        (resource != null && resource.data.uid == request.auth.uid && (request.resource == null || request.resource.data.uid == request.auth.uid))
+      );
+    }
+
+    match /categories/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    match /goals/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    match /settings/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    match /dashboard/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    match /history/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    match /notifications/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    match /support/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    match /backup/{userId}/{document=**} {
+      allow read, write: if isOwner(userId);
+    }
+  }
+}

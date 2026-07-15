@@ -1,0 +1,6 @@
+{
+  "name": "Gestão Financeira Inteligente & BI Dashboard",
+  "description": "Uma plataforma de Business Intelligence e planejamento financeiro para reestruturar orçamentos deficitários, com simuladores de dívidas, análise automática e gerador de automação para Google Sheets.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

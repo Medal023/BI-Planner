@@ -1,0 +1,151 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile information stored upon authentication.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Unique identifier for the user (Firebase Auth UID)."
+        },
+        "nome": {
+          "type": "string",
+          "description": "Full name of the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the user."
+        },
+        "telefone": {
+          "type": "string",
+          "description": "Phone number of the user."
+        },
+        "foto": {
+          "type": "string",
+          "description": "URL to the user's profile photo."
+        },
+        "provedor_login": {
+          "type": "string",
+          "description": "Login provider used (e.g. google, password, phone)."
+        },
+        "email_verificado": {
+          "type": "boolean",
+          "description": "Whether the user's email has been verified."
+        },
+        "data_criacao": {
+          "type": "string",
+          "description": "ISO timestamp of user creation."
+        },
+        "ultimo_login": {
+          "type": "string",
+          "description": "ISO timestamp of last login."
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the user account (e.g. active, suspended)."
+        },
+        "perfil": {
+          "type": "string",
+          "description": "User's access profile or role."
+        },
+        "preferencias": {
+          "type": "object",
+          "description": "Custom preferences such as theme or language."
+        }
+      },
+      "required": [
+        "uid",
+        "nome",
+        "email",
+        "provedor_login",
+        "email_verificado",
+        "data_criacao",
+        "ultimo_login",
+        "status"
+      ]
+    },
+    "BudgetData": {
+      "title": "BudgetData",
+      "description": "Budget spreadsheet and planning data for the user.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The owner's UID."
+        },
+        "data": {
+          "type": "string",
+          "description": "JSON string or array of MonthlyBudget data."
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp of last update."
+        }
+      },
+      "required": [
+        "userId",
+        "data",
+        "updatedAt"
+      ]
+    },
+    "IncomeProfile": {
+      "title": "IncomeProfile",
+      "description": "User income profile detailing salary, extra income sources, and update history.",
+      "type": "object",
+      "properties": {
+        "salarioBase": {
+          "type": "number",
+          "description": "Base monthly salary."
+        },
+        "rendasExtras": {
+          "type": "array",
+          "description": "List of extra income sources."
+        },
+        "rendaTotal": {
+          "type": "number",
+          "description": "Total income calculated automatically."
+        },
+        "frequencia": {
+          "type": "string",
+          "description": "Income receipt frequency."
+        },
+        "ultimaAtualizacao": {
+          "type": "string",
+          "description": "ISO timestamp of the last update."
+        },
+        "usuario": {
+          "type": "string",
+          "description": "UID of the user."
+        },
+        "historico": {
+          "type": "array",
+          "description": "Audit trail of changes made to the income profile."
+        }
+      },
+      "required": [
+        "salarioBase",
+        "rendasExtras",
+        "rendaTotal",
+        "frequencia",
+        "ultimaAtualizacao",
+        "usuario",
+        "historico"
+      ]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Stores user demographic, authentication, and profile settings."
+    },
+    "users/{userId}/budget/data": {
+      "schema": "BudgetData",
+      "description": "Stores user financial planner data for cloud persistence."
+    },
+    "income_profile/{userId}": {
+      "schema": "IncomeProfile",
+      "description": "Stores user income profile and change history."
+    }
+  }
+}
